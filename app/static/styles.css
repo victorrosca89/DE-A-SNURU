@@ -236,7 +236,7 @@ button.pill{border:0;padding:4px 10px;border-radius:20px;font-weight:600}
 }
 
 /* ================= v2.2: sticlă premium, culori roluri ================= */
-:root{--bl:blur(28px) saturate(190%) brightness(1.06);--bl2:blur(16px) saturate(165%);--hi:inset 0 1px 0 rgba(255,255,255,.22),inset 0 0 0 1px rgba(255,255,255,.04);--yel:#ffd60a;--spec:#0a84ff;--lost:#8e8e93}
+:root{--bl:blur(28px) saturate(190%) brightness(1.06);--bl2:blur(16px) saturate(165%);--hi:inset 0 1px 0 rgba(255,255,255,.22),inset 0 0 0 1px rgba(255,255,255,.04);--yel:#ffd60a;--spec:#0a84ff;--lost:#0a84ff}
 @supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
  #hud{background:linear-gradient(160deg,rgba(255,255,255,.15),rgba(255,255,255,.04) 45%,rgba(10,10,12,.42));border-color:rgba(255,255,255,.18);box-shadow:var(--hi),0 18px 50px rgba(0,0,0,.45);border-radius:28px}
  .card,.pc,.sh,.pcard{background:linear-gradient(160deg,rgba(255,255,255,.13),rgba(255,255,255,.03) 50%,rgba(14,14,17,.5));box-shadow:var(--hi),0 24px 60px rgba(0,0,0,.5);border-color:rgba(255,255,255,.16)}
@@ -253,7 +253,7 @@ button.pill{border:0;padding:4px 10px;border-radius:20px;font-weight:600}
 #hrole.hid,#hrole.sosr{background:linear-gradient(160deg,#ff453a,#c4160c)}
 #hrole.seek{background:linear-gradient(160deg,#ffe14d,#e0a800);color:#1a1400}
 
-#hrole.lost{background:linear-gradient(160deg,#9a9aa0,#5b5b61)}
+#hrole.lost{background:linear-gradient(160deg,#3d9bff,#0a63d1)}
 #rrole.seeker{color:var(--yel)}#rrole.hider{color:#ff453a}
 /* markere: Hider roșu · Seeker galben · pierdut gri */
 .pin{box-shadow:0 0 0 2px rgba(0,0,0,.25),0 4px 14px rgba(0,0,0,.5)}
@@ -269,3 +269,17 @@ button.pill{border:0;padding:4px 10px;border-radius:20px;font-weight:600}
 .lg,.rd{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none}.rd{margin-right:7px}
 .lg.h,.rd.h{background:var(--red)}.lg.s,.rd.s{background:var(--yel)}.lg.d,.rd.d{background:var(--lost)}
 .sr b{display:flex;align-items:center}
+
+/* ---------- spectator (albastru) ---------- */
+.pill.spec{color:#b8d9ff;background:rgba(10,132,255,.2)}
+.pin.dead{box-shadow:0 0 0 3px rgba(10,132,255,.35)}
+/* ---------- instalare / linkuri / QR ---------- */
+.getb.pwa{background:#fff;color:#000;border-color:#fff}.getb.pwa svg{stroke:#000}.getb svg{stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.getrow{display:flex;gap:10px}.getrow .getb{flex:1;width:auto;padding:12px 10px;font-size:14px}
+.getb svg{fill:none}.getrow .getb svg{width:22px;height:22px}
+#ggh svg{fill:currentColor}
+#qrm{position:fixed;inset:0;z-index:160;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px}
+.qrc{text-align:center}.qrc canvas{width:min(260px,70vw);height:auto;border-radius:14px;background:#fff;margin:6px auto 10px;display:block}
+.qrc small{display:block;color:var(--g3);word-break:break-all;margin-bottom:12px;font-size:12px}
+
+#getapp{margin-top:2px}

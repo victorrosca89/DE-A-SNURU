@@ -31,10 +31,10 @@ const brg=(a,b,c,d)=>{const t=x=>x*Math.PI/180,y=Math.sin(t(d-b))*Math.cos(t(c))
 const DIR=['N','NE','E','SE','S','SV','V','NV'];
 /* roluri: Hider roșu · Seeker galben · pierdut gri */
 const isLost=p=>!!p&&!!p.st&&p.st!=='alive';
-const rl=p=>isLost(p)?'Pierdut':p.role=='seeker'?'Seeker':'Hider',rc=p=>isLost(p)?'d':p.role=='seeker'?'s':'h';
+const rl=p=>isLost(p)?'Spectator':p.role=='seeker'?'Seeker':'Hider',rc=p=>isLost(p)?'d':p.role=='seeker'?'s':'h';
 const xIcon=()=>L.divIcon({className:'',html:'<div class="xpin"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div>',iconSize:[26,26]});
 const meCls=()=>'me '+(!M?'':isLost(M)?'dead':M.role=='seeker'?'seeker':'hider');
-const ROLEC={dead:'#8e8e93',seeker:'#ffd60a',hider:'#ff3b30'};
+const ROLEC={dead:'#0a84ff',seeker:'#ffd60a',hider:'#ff3b30'};
 function beep(){try{actx=actx||new AudioContext();[0,.22,.44].forEach(d=>{const o=actx.createOscillator();o.frequency.value=900;o.connect(actx.destination);o.start(actx.currentTime+d);o.stop(actx.currentTime+d+.14)})}catch(e){}}
 async function wake(){try{wl=await navigator.wakeLock.request('screen')}catch(e){}}
 addEventListener('deviceorientationabsolute',e=>{if(e.alpha!=null)heading=(360-e.alpha)%360},true);
@@ -48,15 +48,18 @@ function nativeStop(){if(Game)Game.stop().catch(()=>{});nstarted=''}
 async function checkPending(){if(!Game||!I)return;try{const r=await Game.pending();if(r&&r.sos)askSos()}catch(e){}}
 function openUrl(u){if(Game)Game.openUrl({url:u}).catch(()=>{});else window.open(u,'_blank')}
 
-/* ---------- instalare: PWA iOS + APK ---------- */
-const UA=navigator.userAgent,IOS=/iphone|ipad|ipod/i.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
- SAFARI=/safari/i.test(UA)&&!/crios|fxios|edgios|opios|chrome/i.test(UA),
- STANDALONE=!!navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
-let dip=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e});
-if(NATIVE||STANDALONE)$('#getapp').hidden=true;
-$('#gios').onclick=()=>{if(dip&&!IOS){dip.prompt();dip=null;return}$('#iosnote').hidden=!(IOS&&!SAFARI);$('#iosm').hidden=false};
-$('#iosx').onclick=()=>$('#iosm').hidden=true;
-$('#ioscopy').onclick=()=>{const u=location.href.split('?')[0];(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{$('#ioscopy').textContent='Link copiat';setTimeout(()=>$('#ioscopy').textContent='Copiază linkul',2000)},()=>prompt('Copiază linkul',u))};
+/* ---------- link cameră + QR ---------- */
+const WEB=(window.DN_WEB||(NATIVE&&API?API:location.origin+location.pathname)).replace(/index\.html$/,'').replace(/([^/])$/,'$1/');
+const roomLink=c=>WEB+'?c='+c;
+if(window.DN_GITHUB)$('#ggh').href=window.DN_GITHUB;
+if(window.DN_MAIL)$('#gmail').href='mailto:'+window.DN_MAIL+'?subject='+encodeURIComponent("Idei pentru DE-A ȘNURU'");
+if(NATIVE)['#ggh','#gmail'].forEach(k=>{$(k).onclick=e=>{e.preventDefault();openUrl($(k).href)}});
+const copyTxt=(u,ok)=>{(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(ok,()=>prompt('Copiază linkul',u))};
+function showQR(){if(!S)return;const u=roomLink(S.code);$('#qrcode').textContent=S.code;$('#qrlink').textContent=u;
+ try{QR.draw($('#qrcv'),u,260)}catch(e){feed('Nu am putut genera QR-ul')}$('#qrm').hidden=false}
+$('#qrx').onclick=()=>$('#qrm').hidden=true;$('#qrm').onclick=e=>{if(e.target.id=='qrm')e.target.hidden=true};
+$('#qrcopy').onclick=()=>copyTxt(roomLink(S.code),()=>feed('Link copiat'));
+$('#lqr').onclick=showQR;
 
 /* ---------- SPLASH ---------- */
 const SP={p:0,t0:performance.now(),done:false};
@@ -209,7 +212,8 @@ function connect(){
  ws.onmessage=e=>{const m=JSON.parse(e.data);
   if(m.type=='state')onState(m);
   else if(m.type=='event'){
-   if(m.kind=='caught'){pop(m.text,m.sub);vib([200,100,400]);beep()}
+   if(m.kind=='lost'){pop('Te-a tras șnuru','Ești spectator (albastru): urmărești jocul, poți posta indicii foto și poți da SOS.');vib([300,120,300,120,600]);beep()}
+   else if(m.kind=='caught'){pop(m.text,m.sub);vib([200,100,400]);beep()}
    else if(m.kind=='win')vib([300,100,300]);
    else if(m.kind=='go'){feed(m.text);vib([200,80,200])}
    else if(m.kind=='ping'){feed(M&&M.role=='hider'?'Ești vizibil pentru Seekeri chiar acum!':'Locațiile Hiderilor s-au reîmprospătat');vib(M&&M.role=='hider'?[150,80,150]:80)}
@@ -251,14 +255,14 @@ function lobby(){
  st_('#lnote',host?(S.players.length<2?'Ai nevoie de minim 2 jucători.':!ok?'Așteptăm locația tuturor jucătorilor.':'Rolurile se aleg aleatoriu la start.'):'Setările le alege gazda. Așteptăm startul.');
 }
 $('#go').onclick=()=>send({type:'start'});
-$('#lcopy').onclick=()=>{const u=(API||location.origin)+'/?c='+S.code;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>feed('Link copiat'),()=>prompt('Link',u))};
+$('#lcopy').onclick=()=>{copyTxt(roomLink(S.code),()=>feed('Link copiat'))};
 
 /* ---------- joc ---------- */
 function game(){
  const sos=S.phase=='sos',role=M&&M.role,st=M&&M.st,lo=!!M&&isLost(M);
- $('#hrole').textContent=sos?'SOS':lo?'Pierdut':role=='seeker'?'Seeker':'Hider';$('#hrole').className=sos?'sosr':lo?'lost':role=='seeker'?'seek':'hid';
- $('#hlive').textContent=S.live;$('#hh').textContent='Hideri '+S.nh;$('#hs').textContent='Seekeri '+S.ns;
- $('#bcam').hidden=sos||!(role=='hider'&&st=='alive');
+ $('#hrole').textContent=sos?'SOS':lo?'Spectator':role=='seeker'?'Seeker':'Hider';$('#hrole').className=sos?'sosr':lo?'lost':role=='seeker'?'seek':'hid';
+ $('#hlive').textContent=S.live;$('#hh').textContent='Hideri '+S.nh;$('#hs').textContent='Seekeri '+S.ns;$('#hsp').hidden=!S.nsp;$('#hsp').textContent='Spectatori '+(S.nsp||0);
+ $('#bcam').hidden=sos||!(role=='hider');
  $('#caught').hidden=sos||!(M&&M.near&&st=='alive');
  const near=!sos&&!!(M&&M.near&&st=='alive');$('#alert').hidden=!near;
  if(near&&!alerted){alerted=true;vib([300,100,300,100,600]);beep()}if(!near)alerted=false;
@@ -278,7 +282,7 @@ setInterval(()=>{if(document.hidden||!S||!M||S.phase=='lobby'||S.phase=='over')r
  const w=Math.round(pb)+'%';if(bar.style.width!==w)bar.style.width=w;
  const msg=[];
  if(S.phase!='sos'){
-  if(M.st=='caught')msg.push('Ai fost prins. Urmărești jocul.');
+  if(M.st=='caught')msg.push('Te-a tras șnuru · Ești spectator: poți posta indicii și da SOS');
   else if(h&&M.out)msg.push('Peste 1 km de Seeker. Revino în '+fmt(S.grace-(t-M.out)))}
  const wr=$('#warn');wr.hidden=!msg.length;st_('#warn',msg.join(' · '));
  for(const k in lay.p){const p=lay.p[k]._p;if(!p)continue;const tx=esc(p.n)+(p.pt?' · '+ago(t-p.pt):'');if(lay.p[k]._t!==tx){lay.p[k]._t=tx;lay.p[k].setTooltipContent(tx)}

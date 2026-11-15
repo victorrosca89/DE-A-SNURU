@@ -46,14 +46,16 @@
   <button id="create" class="link" hidden>Creează o cameră nouă</button>
  </div>
  <div id="getapp">
-  <button id="gios" class="getb"><svg viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4M5 12v8h14v-8"/></svg><span>Instalează PWA pe iPhone</span></button>
-  <a id="gapk" class="getb" href="https://deasnuru.netlify.app/deasnuru.apk" download rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span>Descarcă APK (Android)</span></a>
+  <div class="getrow">
+   <a id="ggh" class="getb" href="https://github.com/victorrosca89" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,7409.253 C84,7403.59 88.478,7399 94,7399" transform="translate(-84 -7399)"/></svg><span>GitHub</span></a>
+   <a id="gmail" class="getb" href="mailto:victorrosca89@gmail.com?subject=Idei%20pentru%20DE-A%20%C8%98NURU" aria-label="Trimite un email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12ZM16 12V13.5C16 14.8807 17.1193 16 18.5 16V16C19.8807 16 21 14.8807 21 13.5V12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21H16"/></svg><span>Idei pentru joc</span></a>
+  </div>
  </div>
 </section>
 
 <!-- ================= LOBBY ================= -->
 <section id="lobby" class="screen" hidden>
- <header class="lhead"><div><small>Cod cameră</small><b id="lcode"></b></div><div class="hb"><button id="lcopy" class="ghost sm">Copiază link</button><button id="lleave" class="ghost sm">Ieși</button><button id="lexit" class="ghost sm" hidden>Închide app</button></div></header>
+ <header class="lhead"><div><small>Cod cameră</small><b id="lcode"></b></div><div class="hb"><button id="lqr" class="ghost sm">QR</button><button id="lcopy" class="ghost sm">Copiază link</button><button id="lleave" class="ghost sm">Ieși</button><button id="lexit" class="ghost sm" hidden>Închide app</button></div></header>
  <div class="lbl"><span class="livedot"></span><span id="llive"></span><span id="lcount"></span></div>
  <div id="plist"></div>
  <div class="card" id="settings">
@@ -72,7 +74,7 @@
    <div id="hmain"><small id="hlab"></small><b id="hbig"></b><small id="hsub"></small></div>
    <div id="hside"><small id="hplab"></small><b id="hping"></b></div>
   </div>
-  <div class="hchips"><button class="pill live" id="hlivebtn"><i class="livedot"></i><b id="hlive">0</b> live</button><span class="pill" id="hh">Hideri 0</span><span class="pill" id="hs">Seekeri 0</span>
+  <div class="hchips"><button class="pill live" id="hlivebtn"><i class="livedot"></i><b id="hlive">0</b> live</button><span class="pill" id="hh">Hideri 0</span><span class="pill" id="hs">Seekeri 0</span><span class="pill spec" id="hsp" hidden>Spectatori 0</span>
    <button id="hmenu" class="pill menu" aria-label="Meniu / Ieșire"><svg viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>Ieși</button></div>
   <div id="pbar"><i></i></div>
  </div>
@@ -117,7 +119,7 @@
  </div>
 </div>
 
-<div id="sheet" hidden><div class="sh"><div class="grab"></div><h3>Jucători <span id="shlive" class="pill live"></span></h3><div class="legend"><span><i class="lg h"></i>Hider</span><span><i class="lg s"></i>Seeker</span><span><i class="lg d"></i>Pierdut</span></div><div id="slist"></div><button id="sstop" class="danger" hidden>Închide jocul pentru toți</button><button id="sleave" class="ghost">Ieși din joc</button><button id="sexit" class="ghost" hidden>Închide aplicația</button><button id="sclose" class="primary">Înapoi la joc</button></div></div>
+<div id="sheet" hidden><div class="sh"><div class="grab"></div><h3>Jucători <span id="shlive" class="pill live"></span></h3><div class="legend"><span><i class="lg h"></i>Hider</span><span><i class="lg s"></i>Seeker</span><span><i class="lg d"></i>Spectator</span></div><div id="slist"></div><button id="sstop" class="danger" hidden>Închide jocul pentru toți</button><button id="sleave" class="ghost">Ieși din joc</button><button id="sexit" class="ghost" hidden>Închide aplicația</button><button id="sclose" class="primary">Înapoi la joc</button></div></div>
 
 <section id="over" class="screen" hidden>
  <div class="trophy"><svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 01-10 0zM7 6H4v1a4 4 0 004 4M17 6h3v1a4 4 0 01-4 4M12 14v4M8 21h8M10 18h4"/></svg></div>
@@ -139,22 +141,18 @@
 <div id="photo" hidden><div class="pcard wide"><img id="mimg" alt=""><h3 id="mname"></h3><p id="mcap"></p><button id="dl" class="primary">Descarcă</button><button id="mclose" class="ghost">Închide</button></div></div>
 <input type="file" id="ffile" accept="image/*" capture="environment" hidden>
 
-<div id="iosm" hidden><div class="pcard">
- <h3>Instalează pe iPhone / iPad</h3>
- <ol class="iosl">
-  <li>Deschide acest link în <b>Safari</b>.</li>
-  <li>Apasă <b>Distribuie</b> <svg class="shi" viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4M6 11H5v9h14v-9h-1"/></svg> din bara de jos.</li>
-  <li>Alege <b>Adaugă pe ecranul principal</b>.</li>
-  <li>Apasă <b>Adaugă</b>. Deschide jocul din iconiță.</li>
- </ol>
- <p id="iosnote" hidden>Acum nu ești în Safari. Copiază linkul și deschide-l în Safari.</p>
- <button id="ioscopy" class="ghost">Copiază linkul</button><button id="iosx" class="primary">Am înțeles</button>
+<div id="qrm" hidden><div class="pcard qrc">
+ <h3>Alătură-te cu QR</h3><p>Scanează codul cu camera telefonului. Se deschide jocul cu camera <b id="qrcode"></b> completată.</p>
+ <canvas id="qrcv" width="260" height="260"></canvas>
+ <small id="qrlink"></small>
+ <button id="qrcopy" class="ghost">Copiază linkul</button><button id="qrx" class="primary">Închide</button>
 </div></div>
 <div id="feed"></div>
 <div id="offline" hidden><img src="offline.png" alt=""><h2>Nu ai internet</h2><button id="retry" class="primary">Reîncearcă</button></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>window.L||document.write('<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"><\/script>')</script>
 <script src="config.js"></script>
+<script src="qr.js"></script>
 <script src="app.js"></script>
-<script>if('serviceWorker' in navigator&&!window.Capacitor)navigator.serviceWorker.register('/sw.js')</script>
+<script>if('serviceWorker' in navigator&&!window.Capacitor)navigator.serviceWorker.register('sw.js')</script>
 </body></html>
