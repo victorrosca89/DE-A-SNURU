@@ -44,6 +44,7 @@
   <p id="err"></p>
   <div class="btns"><button id="back" class="ghost">Înapoi</button><button id="next" class="primary">Continuă</button></div>
   <button id="create" class="link" hidden>Creează o cameră nouă</button>
+  <button id="cspec" class="link" hidden>Intră ca spectator</button>
  </div>
  <div id="getapp">
   <button id="gios" class="getb"><svg viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4M5 12v8h14v-8"/></svg><span>Instalează PWA pe iPhone</span></button>
@@ -61,7 +62,7 @@
   <div class="grp"><label>Durata jocului</label><div class="chips" id="c-dur"></div></div>
  </div>
  <p id="lnote"></p>
- <div class="lbtm"><button id="lsos" class="sosmini" aria-label="SOS">SOS</button><button id="go" class="primary big" hidden>Începe jocul</button></div>
+ <div class="lbtm"><button id="lspec" class="ghost lsp">Spectator</button><button id="lsos" class="sosmini" aria-label="SOS">SOS</button><button id="go" class="primary big" hidden>Începe jocul</button></div>
 </section>
 
 <!-- ================= JOC ================= -->
@@ -72,13 +73,14 @@
    <div id="hmain"><small id="hlab"></small><b id="hbig"></b><small id="hsub"></small></div>
    <div id="hside"><small id="hplab"></small><b id="hping"></b></div>
   </div>
-  <div class="hchips"><button class="pill live" id="hlivebtn"><i class="livedot"></i><b id="hlive">0</b> live</button><span class="pill" id="hh">Hideri 0</span><span class="pill" id="hs">Seekeri 0</span>
+  <div class="hchips"><button class="pill live" id="hlivebtn"><i class="livedot"></i><b id="hlive">0</b> live</button><span class="pill" id="hh">Hideri 0</span><span class="pill" id="hs">Seekeri 0</span><span class="pill spb" id="hsp" hidden>Spectatori 0</span>
    <button id="hmenu" class="pill menu" aria-label="Meniu / Ieșire"><svg viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>Ieși</button></div>
   <div id="pbar"><i></i></div>
  </div>
  <div id="warn" hidden></div><div id="alert" hidden>Seeker la sub 30 m!</div>
  <div id="dock">
   <button id="caught" hidden>Am fost prins</button>
+  <button id="bspec" class="specbtn" hidden><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Intră ca spectator</button>
   <div class="tools">
    <button id="bplayers" class="round" aria-label="Jucători"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 5a3.5 3.5 0 010 6.5M18 14c2.2.6 3.5 2.6 3.5 6"/></svg></button>
    <button id="bcam" class="round main" aria-label="Cameră" hidden><svg viewBox="0 0 24 24"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
@@ -117,7 +119,7 @@
  </div>
 </div>
 
-<div id="sheet" hidden><div class="sh"><div class="grab"></div><h3>Jucători <span id="shlive" class="pill live"></span></h3><div id="slist"></div><button id="sstop" class="danger" hidden>Închide jocul pentru toți</button><button id="sleave" class="ghost">Ieși din joc</button><button id="sexit" class="ghost" hidden>Închide aplicația</button><button id="sclose" class="primary">Înapoi la joc</button></div></div>
+<div id="sheet" hidden><div class="sh"><div class="grab"></div><h3>Jucători <span id="shlive" class="pill live"></span></h3><div class="legend"><span><i class="lg h"></i>Hider</span><span><i class="lg s"></i>Seeker</span><span><i class="lg v"></i>Spectator</span><span><i class="lg d"></i>Pierdut</span></div><div id="slist"></div><button id="sstop" class="danger" hidden>Închide jocul pentru toți</button><button id="sleave" class="ghost">Ieși din joc</button><button id="sexit" class="ghost" hidden>Închide aplicația</button><button id="sclose" class="primary">Înapoi la joc</button></div></div>
 
 <section id="over" class="screen" hidden>
  <div class="trophy"><svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 01-10 0zM7 6H4v1a4 4 0 004 4M17 6h3v1a4 4 0 01-4 4M12 14v4M8 21h8M10 18h4"/></svg></div>
@@ -127,7 +129,7 @@
 
 <div id="reveal" hidden>
  <div id="rv1"><span>Ești…</span></div>
- <div id="rv2" hidden><div class="rcard"><small>Jump in</small><b id="rrole"></b><p id="rsub"></p></div></div>
+ <div id="rv2" hidden><div class="rcard"><b id="rrole"></b><p id="rsub"></p></div></div>
 </div>
 <div id="pop" hidden><div class="pcard"><h3 id="pt"></h3><p id="ps"></p><button id="pok" class="primary">OK</button><button id="pno" class="ghost" hidden>Anulează</button></div></div>
 

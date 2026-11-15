@@ -70,6 +70,8 @@ public class GameService extends Service {
     private boolean pNear = false, pOut = false;
     private int pRound = -1;
     private double pPing = 0;
+    private boolean w30 = false, w60 = false;
+    private int pNh = -1, pTotal = -1;
 
     @Override public IBinder onBind(Intent i) { return null; }
 
@@ -245,48 +247,84 @@ public class GameService extends Service {
         return o.optString(k, "");
     }
 
+    private static int roleColor(boolean spec, boolean hider, boolean lost) {
+        return spec ? 0xFF0A84FF : lost ? 0xFF8E8E93 : hider ? 0xFFFF3B30 : 0xFFFFD60A;
+    }
+
+    @SuppressWarnings("deprecation")
+    private void wakeScreen() {
+        try {
+            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+            if (pm == null || pm.isInteractive() || appVisible) return;
+            PowerManager.WakeLock w = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "deasnuru:wake");
+            w.acquire(4000);
+        } catch (Exception e) { }
+    }
+
     private void diff(JSONObject st) {
         String phase = s(st, "phase");
         JSONObject me = st.optJSONObject("me");
         String role = s(me, "role"), mst = s(me, "st");
-        boolean near = me != null && me.optBoolean("near", false);
-        boolean out = me != null && !me.isNull("out");
-        int round = st.optInt("round", 0);
+        boolean spec = "spectator".equals(role) || (me != null && me.optBoolean("spec", false));
+        boolean near = !spec && me != null && me.optBoolean("near", false);
+        boolean out = !spec && me != null && !me.isNull("out");
+        int round = st.optInt("round", 0), nh = st.optInt("nh", 0), total = st.optInt("total", 0);
         double pingAt = st.optDouble("ping_at", 0);
         JSONObject sos = st.isNull("sos") ? null : st.optJSONObject("sos");
         String sosKey = sos == null ? "" : (s(sos, "u") + ":" + sos.optDouble("t", 0));
         boolean first = pPhase == null;
-        // Notificarea SOS apare doar cât ține situația: dispare când SOS-ul s-a încheiat (indiferent dacă aplicația e deschisă)
-        // sau când deschizi aplicația (alerta se vede deja acolo).
         if (!"sos".equals(phase) || appVisible) cancelSos();
+        if (round != pRound) { w30 = false; w60 = false; }
         if (!first && !appVisible) {
             boolean hider = "hider".equals(role);
+            String rl = spec ? "SPECTATOR" : hider ? "HIDER" : "SEEKER";
+            int rc = roleColor(spec, hider, false);
+            double nowS = (System.currentTimeMillis() - clockOff) / 1000.0;
             if ("sos".equals(phase) && sos != null && !sosKey.equals(pSosKey)) {
                 sosAlert(st, sos);
             } else if (!"sos".equals(phase) && "sos".equals(pPhase)) {
                 cancelSos();
                 alert("SOS încheiat", "Alerta SOS a fost închisă. Revii în cameră.", CH_ALERT, false, false, 0xFF30D158, 30000);
             }
-            if ("hiding".equals(phase) && round != pRound)
-                alert("Runda a început — ești " + (hider ? "HIDER" : "SEEKER"), hider ? "Ascunde-te! Seekerii pornesc după cronometru." : "Hiderii se ascund. Așteaptă cronometrul.", CH_ALERT, false, false, hider ? 0xFF2A2A2E : 0xFFFF3B30);
+            if ("hiding".equals(phase) && ("lobby".equals(pPhase) || "over".equals(pPhase) || round != pRound))
+                alert("Jocul a început — ești " + rl, spec ? "Privești jocul și vezi locația tuturor, în direct." : hider ? "Ascunde-te! Seekerii pornesc după cronometru." : "Hiderii se ascund. Așteaptă cronometrul.", CH_ALERT, true, false, rc);
+            if ("hiding".equals(phase)) {
+                double r = st.optDouble("hide_end", 0) - nowS;
+                if (!w30 && r > 0 && r <= 30) {
+                    w30 = true;
+                    alert("30 de secunde!", spec ? "Seekerii pornesc imediat." : hider ? "Seekerii pornesc în 30 s. Ascunde-te bine." : "Pornești în 30 s. Pregătește-te.", CH_ALERT, true, false, rc);
+                }
+            }
             if ("hiding".equals(pPhase) && "playing".equals(phase))
-                alert(hider ? "Seekerii au pornit!" : "Vânătoarea a început!", hider ? "Rămâi ascuns și nu te lăsa prins." : "Găsește toți Hiderii. Locațiile se reîmprospătează la 3 minute.", CH_ALERT, false, false, 0xFFFF3B30);
+                alert(hider ? "Seekerii au pornit!" : spec ? "Vânătoarea a început" : "Vânătoarea a început!", hider ? "Rămâi ascuns și nu te lăsa prins." : spec ? "Urmărești Hiderii și Seekerii pe hartă." : "Găsește toți Hiderii. Locațiile se reîmprospătează la 3 minute.", CH_ALERT, true, false, 0xFFFFD60A);
+            if ("playing".equals(phase)) {
+                double end = st.optDouble("end_at", 0), r = end - nowS;
+                if (end > 0 && !w60 && r > 0 && r <= 60) {
+                    w60 = true;
+                    alert("Mai e 1 minut", hider ? "Rezistă — Hiderii câștigă dacă expiră timpul." : spec ? "Jocul se încheie în 60 de secunde." : "Găsește-i acum pe Hiderii rămași!", CH_ALERT, true, false, rc);
+                }
+            }
             if ("over".equals(phase) && !"over".equals(pPhase)) {
                 String w = "seekers".equals(s(st, "winner")) ? "Seekerii au câștigat" : "Hiderii au câștigat";
                 String why = s(st, "why");
                 String r = "time".equals(why) ? "Timpul s-a scurs." : "all_caught".equals(why) ? "Toți Hiderii au fost prinși." : "seekers_left".equals(why) ? "Seekerii au plecat." : "";
-                alert("Joc terminat — " + w, r, CH_ALERT, false, false, 0xFF0A84FF);
+                alert("Joc terminat — " + w, r, CH_ALERT, true, false, 0xFF0A84FF);
             }
-            if (near && !pNear) alert("Seeker la sub 30 m!", "Fugi sau ascunde-te acum.", CH_ALERT, false, false, 0xFFFF3B30);
+            if (near && !pNear) alert("Seeker la sub 30 m!", "Fugi sau ascunde-te acum.", CH_ALERT, true, false, 0xFFFF3B30);
             if (out && !pOut) alert("Ești la peste 1 km de Seeker", "Revino în apropiere, altfel ești eliminat.", CH_ALERT, false, false, 0xFFFF9500);
-            if ("caught".equals(mst) && "alive".equals(pSt)) alert("Ai fost prins", "Urmărești jocul de pe margine.", CH_ALERT, false, false, 0xFFFF3B30);
-            if ("playing".equals(phase) && "playing".equals(pPhase) && pingAt > pPing + 1 && !"caught".equals(mst))
-                alert(hider ? "Ești vizibil pentru Seekeri!" : "Locațiile Hiderilor s-au actualizat", hider ? "Poziția ta tocmai a fost dezvăluită. Mută-te!" : "Deschide harta pentru noile poziții.", CH_ALERT, false, false, hider ? 0xFFFF9500 : 0xFF0A84FF);
+            if (!spec && "caught".equals(mst) && "alive".equals(pSt)) alert("Ai fost prins", "Ai pierdut runda. Deschide aplicația: SOS sau intră ca spectator.", CH_ALERT, true, false, 0xFF8E8E93);
+            if ("playing".equals(phase) && "playing".equals(pPhase) && pNh >= 0 && nh < pNh && !"caught".equals(mst))
+                alert("Un Hider a fost prins", "Mai " + (nh == 1 ? "rămâne 1 Hider" : "rămân " + nh + " Hideri") + " în joc.", CH_ALERT, false, false, 0xFFFF3B30);
+            if ("lobby".equals(phase) && "lobby".equals(pPhase) && pTotal >= 0 && total != pTotal)
+                alert(total > pTotal ? "Un jucător a intrat în cameră" : "Un jucător a ieșit din cameră", total + " în cameră.", CH_ALERT, false, false, 0xFF0A84FF, 20000);
+            if ("playing".equals(phase) && "playing".equals(pPhase) && pingAt > pPing + 1 && !"caught".equals(mst) && !spec)
+                alert(hider ? "Ești vizibil pentru Seekeri!" : "Locațiile Hiderilor s-au actualizat", hider ? "Poziția ta tocmai a fost dezvăluită. Mută-te!" : "Deschide harta pentru noile poziții.", CH_ALERT, hider, false, hider ? 0xFFFF9500 : 0xFF0A84FF);
         }
-        pPhase = phase; pSt = mst; pNear = near; pOut = out; pRound = round; pPing = pingAt; pSosKey = sosKey;
+        pPhase = phase; pSt = mst; pNear = near; pOut = out; pRound = round; pPing = pingAt; pSosKey = sosKey; pNh = nh; pTotal = total;
     }
 
     private void sosAlert(JSONObject st, JSONObject sos) {
+        wakeScreen();
         boolean mine = user.equals(s(sos, "u"));
         String who = s(sos, "n");
         String title, text;
@@ -325,6 +363,7 @@ public class GameService extends Service {
     }
 
     private void alert(String title, String text, String ch, boolean full, boolean insist, int color, long timeoutMs) {
+        if (full) wakeScreen();
         try {
             Notification.Builder b = nb(ch);
             b.setSmallIcon(smallIcon()).setContentTitle(title).setContentText(text)
@@ -363,14 +402,16 @@ public class GameService extends Service {
             JSONObject me = st.optJSONObject("me");
             String role = s(me, "role");
             boolean hider = "hider".equals(role), seeker = "seeker".equals(role);
+            boolean spec = "spectator".equals(role) || (me != null && me.optBoolean("spec", false));
+            boolean lost = !spec && me != null && !s(me, "st").isEmpty() && !"alive".equals(s(me, "st"));
             JSONObject sos = st.isNull("sos") ? null : st.optJSONObject("sos");
             int live = st.optInt("live", 0), total = st.optInt("total", 0), nh = st.optInt("nh", 0), ns = st.optInt("ns", 0);
-            String roleTxt = seeker ? "SEEKER · caută Hiderii" : hider ? "HIDER · se ascunde" : "—";
+            String roleTxt = spec ? "SPECTATOR · privești jocul" : lost ? "PIERDUT · poți intra ca spectator" : seeker ? "SEEKER · caută Hiderii" : hider ? "HIDER · se ascunde" : "—";
             String phaseTxt = "lobby".equals(phase) ? "În cameră (lobby)" : "hiding".equals(phase) ? "Ascundere" : "playing".equals(phase) ? "În joc" : "over".equals(phase) ? "Joc terminat" : "SOS ACTIV";
-            color = "sos".equals(phase) ? 0xFFFF3B30 : seeker ? 0xFFFF3B30 : 0xFF2A2A2E;
-            String tag = "sos".equals(phase) ? "SOS" : seeker ? "SEEKER" : hider ? "HIDER" : "DE-A ȘNURU'";
+            color = "sos".equals(phase) ? 0xFFFF3B30 : spec ? 0xFF0A84FF : lost ? 0xFF8E8E93 : seeker ? 0xFFFFD60A : hider ? 0xFFFF3B30 : 0xFF2A2A2E;
+            String tag = "sos".equals(phase) ? "SOS" : spec ? "SPECTATOR" : seeker ? "SEEKER" : hider ? "HIDER" : "DE-A ȘNURU'";
             title = tag + " · " + phaseTxt;
-            if (me != null && "caught".equals(s(me, "st"))) title = tag + " · PRINS";
+            if (lost) title = tag + " · PIERDUT";
             // cronometru nativ (merge singur, chiar și cu ecranul stins)
             if ("hiding".equals(phase)) { chrono = true; chronoMs = devMs(st.optDouble("hide_end", 0)); }
             else if ("playing".equals(phase)) {
