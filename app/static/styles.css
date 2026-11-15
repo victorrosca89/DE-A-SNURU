@@ -35,7 +35,7 @@ svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap
 /* ---------- hartă ---------- */
 #map{position:fixed;inset:0;z-index:0;background:#fff}#map.idle{pointer-events:none}
 .leaflet-container{background:#fff;font-family:inherit}
-.basetile{}
+.leaflet-tile-pane{filter:grayscale(1) brightness(1.12) contrast(.88)}
 .leaflet-control-attribution{background:rgba(255,255,255,.75)!important;color:#777!important;font-size:9px}.leaflet-control-attribution a{color:#555!important}
 #shade{position:fixed;inset:0;z-index:1;background:linear-gradient(rgba(0,0,0,.84),rgba(0,0,0,.94));}
 
@@ -189,3 +189,14 @@ button.pill{border:0;padding:4px 10px;border-radius:20px;font-weight:600}
 .hchips{align-items:center}
 .danger{background:linear-gradient(160deg,var(--red),#c4160c);border-color:var(--red);color:#fff}
 .round{width:50px;height:50px}.tools{gap:9px}
+
+/* ---------- instalare PWA / APK ---------- */
+#getapp{display:flex;flex-direction:column;gap:10px}
+.getb{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 16px;border-radius:16px;border:1px solid #383a41;background:rgba(255,255,255,.06);color:#fff;font-weight:600;font-size:15px;text-decoration:none;cursor:pointer}
+.getb svg{width:20px;height:20px;flex:none}
+.getb:active{transform:scale(.97)}
+#iosm{position:fixed;inset:0;z-index:160;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:20px}
+.iosl{text-align:left;color:var(--g4);font-size:15px;line-height:1.5;padding-left:22px;display:flex;flex-direction:column;gap:8px}
+.shi{width:18px;height:18px;vertical-align:-4px}
+#iosnote{color:#ffb4ae!important}
+#jserr{position:fixed;left:8px;right:8px;bottom:8px;z-index:999;background:#b00020;color:#fff;font:12px/1.35 monospace;padding:8px 10px;border-radius:10px;word-break:break-word}

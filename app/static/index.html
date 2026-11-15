@@ -1,7 +1,8 @@
 <!doctype html><html lang="ro"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#000000"><meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#000000"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="DE-A ȘNURU'"><meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -43,6 +44,10 @@
   <p id="err"></p>
   <div class="btns"><button id="back" class="ghost">Înapoi</button><button id="next" class="primary">Continuă</button></div>
   <button id="create" class="link" hidden>Creează o cameră nouă</button>
+ </div>
+ <div id="getapp">
+  <button id="gios" class="getb"><svg viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4M5 12v8h14v-8"/></svg><span>Instalează PWA pe iPhone</span></button>
+  <a id="gapk" class="getb" href="https://deasnuru.netlify.app/deasnuru.apk" download rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span>Descarcă APK (Android)</span></a>
  </div>
 </section>
 
@@ -134,9 +139,21 @@
 <div id="photo" hidden><div class="pcard wide"><img id="mimg" alt=""><h3 id="mname"></h3><p id="mcap"></p><button id="dl" class="primary">Descarcă</button><button id="mclose" class="ghost">Închide</button></div></div>
 <input type="file" id="ffile" accept="image/*" capture="environment" hidden>
 
+<div id="iosm" hidden><div class="pcard">
+ <h3>Instalează pe iPhone / iPad</h3>
+ <ol class="iosl">
+  <li>Deschide acest link în <b>Safari</b>.</li>
+  <li>Apasă <b>Distribuie</b> <svg class="shi" viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4M6 11H5v9h14v-9h-1"/></svg> din bara de jos.</li>
+  <li>Alege <b>Adaugă pe ecranul principal</b>.</li>
+  <li>Apasă <b>Adaugă</b>. Deschide jocul din iconiță.</li>
+ </ol>
+ <p id="iosnote" hidden>Acum nu ești în Safari. Copiază linkul și deschide-l în Safari.</p>
+ <button id="ioscopy" class="ghost">Copiază linkul</button><button id="iosx" class="primary">Am înțeles</button>
+</div></div>
 <div id="feed"></div>
 <div id="offline" hidden><img src="offline.png" alt=""><h2>Nu ai internet</h2><button id="retry" class="primary">Reîncearcă</button></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>window.L||document.write('<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"><\/script>')</script>
 <script src="config.js"></script>
 <script src="app.js"></script>
 <script>if('serviceWorker' in navigator&&!window.Capacitor)navigator.serviceWorker.register('/sw.js')</script>

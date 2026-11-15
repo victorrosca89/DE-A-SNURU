@@ -1,3 +1,6 @@
+function showErr(t){try{let d=document.getElementById('jserr');if(!d){d=document.createElement('div');d.id='jserr';d.onclick=()=>d.remove();document.body.append(d)}d.textContent='Eroare: '+t+' (atinge ca să închizi)'}catch(e){}}
+addEventListener('error',e=>showErr((e.message||'necunoscută')+(e.lineno?' @'+e.lineno:'')));
+addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
 const API=(window.DN_SERVER||'').replace(/\/$/,''),NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
 const Game=NATIVE?Capacitor.registerPlugin('Game'):null;
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),LS=localStorage;
@@ -36,6 +39,16 @@ function nativeStart(){if(!Game||!I||!pos)return;const k=I.code+':'+I.user;if(ns
 function nativeStop(){if(Game)Game.stop().catch(()=>{});nstarted=''}
 async function checkPending(){if(!Game||!I)return;try{const r=await Game.pending();if(r&&r.sos)askSos()}catch(e){}}
 function openUrl(u){if(Game)Game.openUrl({url:u}).catch(()=>{});else window.open(u,'_blank')}
+
+/* ---------- instalare: PWA iOS + APK ---------- */
+const UA=navigator.userAgent,IOS=/iphone|ipad|ipod/i.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
+ SAFARI=/safari/i.test(UA)&&!/crios|fxios|edgios|opios|chrome/i.test(UA),
+ STANDALONE=!!navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+let dip=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e});
+if(NATIVE||STANDALONE)$('#getapp').hidden=true;
+$('#gios').onclick=()=>{if(dip&&!IOS){dip.prompt();dip=null;return}$('#iosnote').hidden=!(IOS&&!SAFARI);$('#iosm').hidden=false};
+$('#iosx').onclick=()=>$('#iosm').hidden=true;
+$('#ioscopy').onclick=()=>{const u=location.href.split('?')[0];(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{$('#ioscopy').textContent='Link copiat';setTimeout(()=>$('#ioscopy').textContent='Copiază linkul',2000)},()=>prompt('Copiază linkul',u))};
 
 /* ---------- SPLASH ---------- */
 const SP={p:0,t0:performance.now(),done:false};
@@ -79,11 +92,11 @@ async function join(create){
 
 /* ---------- hartă: toată lumea, albă ---------- */
 const SRC=[
- {u:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',o:{subdomains:'abcd',maxNativeZoom:20,attribution:'&copy; OpenStreetMap &copy; CARTO'}},
- {u:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxNativeZoom:19,attribution:'&copy; OpenStreetMap'}}];
+ {u:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxNativeZoom:19,attribution:'&copy; OpenStreetMap contributors'}},
+ {u:'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',o:{subdomains:'abc',maxNativeZoom:20,attribution:'&copy; OpenStreetMap contributors'}}];
 function mkTiles(){
  if(tl)map.removeLayer(tl);const s=SRC[tsrc];
- tl=L.tileLayer(s.u,Object.assign({maxZoom:20,minZoom:2,className:'basetile',keepBuffer:2},s.o)).addTo(map);
+ tl=L.tileLayer(s.u,Object.assign({maxZoom:20,minZoom:2,keepBuffer:2},s.o)).addTo(map);
  tl.on('tileload',()=>{terr=0;mapReady=true});
  tl.on('tileerror',()=>{if(++terr>=6&&tsrc<SRC.length-1){tsrc++;terr=0;mkTiles()}})}
 function initMap(){
@@ -94,7 +107,7 @@ function initMap(){
  setTimeout(()=>map.invalidateSize(),300);
 }
 function setPos(la,ln,acc){pos={lat:la,lng:ln};posAcc=acc;
- if(!lay.me){lay.me=L.marker([la,ln],{icon:L.divIcon({className:'',html:'<div class="me"></div>',iconSize:[22,22]}),zIndexOffset:1000}).addTo(map);map.setView([la,ln],17);
+ if(!map){}else if(!lay.me){lay.me=L.marker([la,ln],{icon:L.divIcon({className:'',html:'<div class="me"></div>',iconSize:[22,22]}),zIndexOffset:1000}).addTo(map);map.setView([la,ln],17);
   lay.acc=L.circle([la,ln],{radius:acc||20,stroke:false,fillColor:'#0a84ff',fillOpacity:.12,interactive:false}).addTo(map)}
  else{lay.me.setLatLng([la,ln]);lay.acc.setLatLng([la,ln]);lay.acc.setRadius(Math.min(acc||20,150))}
  if(Date.now()-lastSend>2000){lastSend=Date.now();send({type:'pos',lat:la,lng:ln})}
@@ -110,6 +123,7 @@ function pinCls(p){
  if(p.role=='seeker')return'pin seeker';
  return'pin '+(M&&M.role=='seeker'&&S.phase=='playing'?'ghost':'hider')}
 function mapUpdate(){
+ if(!map)return;
  const ids=new Set(S.players.map(p=>p.u)),sos=S.phase=='sos'?S.sos:null;
  for(const k in lay.p)if(!ids.has(k)){map.removeLayer(lay.p[k]);delete lay.p[k]}
  for(const k in lay.ring)if(!ids.has(k)){map.removeLayer(lay.ring[k]);delete lay.ring[k]}
@@ -153,6 +167,7 @@ function sosLayers(s){
   if(!lay.line)lay.line=L.polyline(pts,{color:'#ff3b30',weight:5,opacity:.9,dashArray:'2 10',lineCap:'round',interactive:false}).addTo(map);else lay.line.setLatLngs(pts)}
  fetchRoute(s)}
 function clearSos(){
+ if(!map)return;
  if(lay.sosPin){map.removeLayer(lay.sosPin);lay.sosPin=null}
  for(const k in lay.sosLines){map.removeLayer(lay.sosLines[k]);delete lay.sosLines[k]}
  if(lay.route){map.removeLayer(lay.route);lay.route=null}if(lay.line){map.removeLayer(lay.line);lay.line=null}
@@ -168,6 +183,7 @@ async function fetchRoute(s){
  catch(e){route=null}
  if(S&&S.phase=='sos')sosLayers(S.sos)}
 function fitAll(){
+ if(!map)return;
  const pts=[];if(pos)pts.push([pos.lat,pos.lng]);for(const k in lay.p)pts.push(lay.p[k].getLatLng());
  if(S&&S.sos&&S.sos.lat!=null)pts.push([S.sos.lat,S.sos.lng]);
  if(pts.length>1)map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[44,170],paddingBottomRight:[44,S&&S.phase=='sos'?330:180],maxZoom:17});
@@ -192,7 +208,7 @@ function connect(){
 function bail(t){noRe=true;try{ws.close()}catch(e){}I=null;lsig='';psig=csig='';gone=0;delete LS.dn_active;nativeStop();siren(false);ldOff();clearSosUI();$('#sosconf').hidden=$('#sheet').hidden=$('#pop').hidden=true;show('intro');go(2);err(t||'')}
 function show(v){if(v==lastView)return;lastView=v;
  ['intro','lobby','over'].forEach(x=>$('#'+x).hidden=x!=v);$('#game').hidden=v!='game';
- $('#map').classList.toggle('idle',v!='game');$('#shade').hidden=v=='game';if(v=='game')setTimeout(()=>map.invalidateSize(),50)}
+ $('#map').classList.toggle('idle',v!='game');$('#shade').hidden=v=='game';if(v=='game'&&map)setTimeout(()=>map.invalidateSize(),50)}
 function onState(m){
  if(!I)return;
  const mp=m.players.find(p=>p.u==I.user);
@@ -263,7 +279,7 @@ function over(){
 }
 $('#oback').onclick=()=>send({type:'reset'});
 $('#bfit').onclick=fitAll;
-$('#bloc').onclick=()=>pos&&map.setView([pos.lat,pos.lng],17);
+$('#bloc').onclick=()=>pos&&map&&map.setView([pos.lat,pos.lng],17);
 $('#bplayers').onclick=()=>{$('#shlive').innerHTML='<i class="livedot"></i>'+S.live+' live';
  $('#slist').innerHTML=S.players.map(p=>`<div class="sr ${p.st!='alive'?'dead':''}"><div class="av ${p.live?'on':''}">${esc(p.n.trim()[0]||'?').toUpperCase()}</div><div><b>${esc(p.n)}</b><small>@${esc(p.u)}${S.phase=='sos'?'':' · '+(p.role=='seeker'?'Seeker':'Hider')}</small></div><span class="tag">${p.left?'Ieșit':p.live?'Live':'Offline'}</span></div>`).join('');$('#sstop').hidden=S.host!=I.user;$('#sheet').hidden=false};
 $('#sstop').onclick=()=>cfm('Închizi jocul?','Jocul se oprește pentru toți și revii în cameră.','Închide jocul',()=>{send({type:'reset'});$('#sheet').hidden=true});
@@ -375,6 +391,6 @@ addEventListener('online',()=>{hideOffline();if(I&&(!ws||ws.readyState>1)){fails
 $('#retry').onclick=()=>{if(!navigator.onLine)return;hideOffline();if(I){fails=0;connect()}};
 function leave(){noRe=true;send({type:'leave'});siren(false);nativeStop();delete LS.dn_active;LS.dn_code='';setTimeout(()=>{try{ws.close()}catch(e){}location.reload()},150)}
 $('#lleave').onclick=$('#oleave').onclick=leave;$('#chg').onclick=()=>go(0);$('#bleave').onclick=leave;$('#sleave').onclick=()=>cfm('Ieși din joc?','Vei părăsi runda și revii la ecranul de start.','Ieși',leave);
-initMap();go(hasProfile()?2:0);if(!navigator.onLine)showOffline();
+go(hasProfile()?2:0);try{initMap()}catch(e){map=null;showErr('Harta: '+e.message)}if(!navigator.onLine)showOffline();
 if(LS.dn_active&&LS.dn_name&&LS.dn_user){I={name:LS.dn_name.trim(),user:LS.dn_user,code:LS.dn_active};ld('Reconectare','Revin în camera '+I.code+'…');connect();gps();wake()}
 checkPending();

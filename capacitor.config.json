@@ -4,7 +4,8 @@
  "webDir": "www",
  "backgroundColor": "#000000",
  "server": {
-  "androidScheme": "https"
+  "androidScheme": "https",
+  "hostname": "deasnuru.netlify.app"
  },
  "android": {
   "backgroundColor": "#000000"
