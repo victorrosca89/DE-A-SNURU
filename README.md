@@ -12,9 +12,9 @@ Nu există două jocuri identice. Există doar cei care caută și cei care înc
 
 | | |
 |---|---|
-| 🌐 **Website** | [victorrosca89.github.io/DE-A-SNURU-WEB](https://victorrosca89.github.io/DE-A-SNURU-WEB/) |
-| 📱 **Descarcă APK (Android)** | [DE-A-SNURU.apk · v2.12](https://github.com/victorrosca89/DE-A-SNURU/releases/download/v2.12/DE-A-SNURU.apk) |
-| 💻 **Repository** | [github.com/victorrosca89/DE-A-SNURU](https://github.com/victorrosca89/DE-A-SNURU) |
+| **Website** | [victorrosca89.github.io/DE-A-SNURU-WEB](https://victorrosca89.github.io/DE-A-SNURU-WEB/) |
+| **Descarcă APK (Android)** | [DE-A-SNURU.apk · v2.12](https://github.com/victorrosca89/DE-A-SNURU/releases/download/v2.12/DE-A-SNURU.apk) |
+| **Repository** | [github.com/victorrosca89/DE-A-SNURU](https://github.com/victorrosca89/DE-A-SNURU) |
 
 ---
 
