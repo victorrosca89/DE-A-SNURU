@@ -7,6 +7,7 @@ const Game=NATIVE?plug('Game'):null;
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),LS=localStorage;
 let fails=0,joining=false,gpsOn=false,tl,S=null,M=null,I=null,off=0,pos=null,posAcc=null,map,ws,lastSend=0,alerted=false,actx,noRe=false,step=0,cur=null,lsig='',lastView='',camStream,camBlob,camCb,wl,heading=null,nstarted='';
 let tsrc=0,terr=0,mapReady=false;
+let sosPhoto=false,sosPhotoT=0,sosPhotoW=0;   // flux foto după SOS
 let sosSeen='',panelOpen=true,route=null,routeAt=0,routeFrom=null,routeTo=null,sirenT=null,sirenO=null,sirenStop=0,hold=null;
 const lay={p:{},ph:{},cp:{},ring:{},me:null,acc:null,sosPin:null,sosLines:{},route:null,line:null};
 function mkTok(){try{const a=new Uint8Array(20);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('')}catch(e){return Array.from({length:40},()=>Math.floor(Math.random()*16).toString(16)).join('')}}
@@ -71,7 +72,7 @@ F.forEach(k=>{const e=$('#'+k);e.value=LS['dn_'+k]||'';
 const qc=new URLSearchParams(location.search).get('c');if(qc){$('#code').value=qc.toUpperCase().slice(0,4);LS.dn_code=$('#code').value}
 const hasProfile=()=>(LS.dn_name||'').trim().length>1&&(LS.dn_user||'').length>2;
 function go(n){step=n;$$('.step').forEach(s=>s.classList.toggle('on',+s.dataset.s==n));$$('.dots i').forEach((d,i)=>d.classList.toggle('on',i<=n));
- const sv=hasProfile();$('#whon').textContent=($('#name').value||'').trim();$('#who').hidden=!(n==2&&sv);$('#back').style.visibility=(n&&!(n==2&&sv))?'visible':'hidden';$('#next').textContent=n==2?'Intră în cameră':'Continuă';$('#create').hidden=n!=2;err('')}
+ const sv=hasProfile();$('#whon').textContent=($('#name').value||'').trim();$('#who').hidden=!(n==2&&sv);$('#back').hidden=!(n&&!(n==2&&sv));$('.btns').classList.toggle('stack',n==2);$('#next').textContent=n==2?'Intră în cameră':'Continuă';$('#create').hidden=n!=2;err('')}
 $('#back').onclick=()=>go(step-1);
 $('#next').onclick=()=>{
  if(step==0){if($('#name').value.trim().length<2)return err('Scrie numele și prenumele.');go(1);$('#user').focus()}
@@ -91,10 +92,11 @@ async function join(create){
  connect();gps();wake();
 }
 
-/* ---------- hartă: toată lumea, albă ---------- */
+/* ---------- hartă: toată lumea, dark mode ---------- */
 const SRC=[
- {u:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxNativeZoom:19,attribution:'&copy; OpenStreetMap contributors'}},
- {u:'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',o:{subdomains:'abc',maxNativeZoom:20,attribution:'&copy; OpenStreetMap contributors'}}];
+ {u:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',o:{subdomains:'abcd',maxNativeZoom:20,detectRetina:true,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}},
+ {u:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxNativeZoom:19,className:'dn-inv',attribution:'&copy; OpenStreetMap contributors'}},
+ {u:'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',o:{subdomains:'abc',maxNativeZoom:20,className:'dn-inv',attribution:'&copy; OpenStreetMap contributors'}}];
 function mkTiles(){
  if(tl)map.removeLayer(tl);const s=SRC[tsrc];
  tl=L.tileLayer(s.u,Object.assign({maxZoom:20,minZoom:2,keepBuffer:2},s.o)).addTo(map);
@@ -135,7 +137,7 @@ function mapUpdate(){
   else lay.p[k].setLatLng([p.lat,p.lng]);
   if(lay.p[k]._c!=cls){lay.p[k]._c=cls;lay.p[k].setIcon(ic)}lay.p[k]._p=p;
   // hiderii văzuți de Seekeri: cerc „zonă posibilă” care crește cu vechimea locației
-  if(p.pt&&cls=='pin ghost'){if(!lay.ring[k])lay.ring[k]=L.circle([p.lat,p.lng],{radius:20,color:'#111',weight:1.5,dashArray:'5 6',fillColor:'#111',fillOpacity:.06,interactive:false}).addTo(map);else lay.ring[k].setLatLng([p.lat,p.lng])}
+  if(p.pt&&cls=='pin ghost'){if(!lay.ring[k])lay.ring[k]=L.circle([p.lat,p.lng],{radius:20,color:'#30d158',weight:1.5,dashArray:'5 6',fillColor:'#30d158',fillOpacity:.08,interactive:false}).addTo(map);else lay.ring[k].setLatLng([p.lat,p.lng])}
   else if(lay.ring[k]){map.removeLayer(lay.ring[k]);delete lay.ring[k]}}
  const pid=new Set(S.photos.map(x=>x.id)),cid=new Set(S.caps.map(x=>x.id));
  for(const k in lay.ph)if(!pid.has(k)){map.removeLayer(lay.ph[k]);delete lay.ph[k]}
@@ -155,7 +157,7 @@ function sosLayers(s){
  // direcție de la fiecare jucător către persoana în pericol
  for(const p of S.players){if(p.u==s.u||p.u==I.user||p.lat==null)continue;seen.add(p.u);
   const pts=[[p.lat,p.lng],ll];
-  if(!lay.sosLines[p.u])lay.sosLines[p.u]=L.polyline(pts,{color:'#111',weight:2,opacity:.45,dashArray:'4 8',interactive:false}).addTo(map);else lay.sosLines[p.u].setLatLngs(pts)}
+  if(!lay.sosLines[p.u])lay.sosLines[p.u]=L.polyline(pts,{color:'#fff',weight:2,opacity:.5,dashArray:'4 8',interactive:false}).addTo(map);else lay.sosLines[p.u].setLatLngs(pts)}
  for(const k in lay.sosLines)if(!seen.has(k)){map.removeLayer(lay.sosLines[k]);delete lay.sosLines[k]}
  // traseul meu
  if(mine||!pos){if(lay.route){map.removeLayer(lay.route);lay.route=null}if(lay.line){map.removeLayer(lay.line);lay.line=null}return}
@@ -221,7 +223,8 @@ function onState(m){
  else if(m.phase=='over'){clearSosUI();show('over');over();if(vis)mapUpdate()}
  else{show('game');game();if(vis)mapUpdate()}
 }
-function clearSosUI(){if(sosSeen){sosSeen='';siren(false);$('#sosov').hidden=true;$('#sospanel').hidden=true;panelOpen=true;clearSos()}}
+function clearSosUI(){if(sosPhoto&&Date.now()-sosPhotoT>8000){sosPhoto=false;clearTimeout(sosPhotoW);$('#cam').hidden=true;stopCam()}
+if(sosSeen){sosSeen='';siren(false);$('#sosov').hidden=true;$('#sospanel').hidden=true;panelOpen=true;clearSos()}}
 
 /* ---------- lobby ---------- */
 const OPT={hide:[[60,'1 min'],[120,'2 min'],[180,'3 min'],[300,'5 min'],[600,'10 min']],dur:[[1800,'30 min'],[2700,'45 min'],[3600,'1 oră'],[7200,'2 ore'],[0,'Nelimitat']]};
@@ -301,7 +304,11 @@ const hb=$('#sosHold'),harc=$('#hArc');
 function holdStart(e){e.preventDefault();if(hold)return;const t0=performance.now();vib(25);
  const f=t=>{const k=Math.min(1,(t-t0)/2000);harc.style.strokeDashoffset=339.3*(1-k);if(k>=1){hold=null;holdDone();return}hold=requestAnimationFrame(f)};hold=requestAnimationFrame(f)}
 function holdEnd(){if(hold){cancelAnimationFrame(hold);hold=null}harc.style.strokeDashoffset=339.3}
-function holdDone(){holdEnd();$('#sosconf').hidden=true;vib([200,100,400]);sendSos();feed('SOS trimis…')}
+function holdDone(){holdEnd();$('#sosconf').hidden=true;vib([200,100,400]);
+ // întâi pornim fluxul foto (ca alerta proprie să nu acopere camera), apoi trimitem SOS-ul imediat – poza nu întârzie alerta
+ sosPhoto=true;sosPhotoT=Date.now();sendSos();feed('SOS trimis…');
+ openCam('SOS · fă o poză unde ești',b=>upload('photo',b,{sos:1}))}
+function endSosPhoto(){if(!sosPhoto)return;sosPhoto=false;clearTimeout(sosPhotoW);if(I&&S&&S.phase=='sos')sosView()}
 hb.addEventListener('pointerdown',holdStart);['pointerup','pointercancel','pointerleave'].forEach(ev=>hb.addEventListener(ev,holdEnd));hb.oncontextmenu=e=>e.preventDefault();
 function siren(on){
  clearInterval(sirenT);sirenT=null;try{sirenO&&sirenO.stop()}catch(e){}sirenO=null;
@@ -310,7 +317,9 @@ function siren(on){
   let k=0;sirenT=setInterval(()=>{k++;try{o.frequency.setValueAtTime(k%2?650:950,actx.currentTime)}catch(e){}vib([400,150,400]);if(Date.now()>sirenStop)siren(false)},450)}catch(e){}}
 function sosView(){
  const s=S.sos;if(!s)return;const key=s.u+':'+s.t,mine=s.u==I.user;
+ if(mine&&sosPhoto&&sosSeen!=key){$('#sosconf').hidden=true;$('#sheet').hidden=true;sosPanel();return}   // în timp ce faci poza, nu acoperim camera
  if(sosSeen!=key){sosSeen=key;panelOpen=true;route=routeFrom=routeTo=null;routeAt=0;
+  if(!mine&&sosPhoto){sosPhoto=false;clearTimeout(sosPhotoW)}
   $('#sosconf').hidden=true;$('#sheet').hidden=true;$('#cam').hidden=true;stopCam();
   $('#sotitle').textContent=mine?'SOS trimis':'SOS de la '+s.n;
   $('#sotext').textContent=mine?'Jocul s-a oprit pentru toți. Rămâi pe loc — ceilalți vin spre tine.':'Jocul s-a oprit. Mergeți imediat la '+s.n+'! Locația tuturor este acum vizibilă pe hartă.';
@@ -348,25 +357,63 @@ function reveal(role){const r=$('#reveal');r.hidden=false;$('#rv1').hidden=false
  setTimeout(()=>{$('#rv1').hidden=true;$('#rv2').hidden=false;vib([120,60,250])},1900);
  setTimeout(()=>r.hidden=true,6200);r.onclick=()=>{if(!$('#rv2').hidden)r.hidden=true}}
 
-/* ---------- cameră ---------- */
-function stopCam(){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}}
+/* ---------- cameră (obiectiv principal „wide”, nu ultra-wide) ---------- */
+const camNo=d=>{const m=/camera\d*\s+(\d+)/i.exec(d.label||'');return m?+m[1]:99};   // „camera2 0, facing back” → 0
+/* Alege obiectivul principal: iOS „Back Camera”; Android: cel mai mic id dintre camerele spate, fără ultra-wide/macro/tele/depth. */
+async function pickBack(){
+ try{const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput'&&d.deviceId);
+  if(ds.length<2||!ds.some(d=>d.label))return null;
+  const lab=d=>(d.label||'').toLowerCase();
+  const back=ds.filter(d=>/back|rear|environment|world|spate/.test(lab(d))&&!/front|user|selfie|face/.test(lab(d)));
+  if(!back.length)return null;
+  let best=back.find(d=>/^back camera$/.test(lab(d)));
+  if(!best){const good=back.filter(d=>!/ultra|wide.?angle|ultrawide|0\.5|macro|depth|tele|zoom|infrared|\bir\b|mono/.test(lab(d)));
+   best=(good.length?good:back).slice().sort((x,y)=>camNo(x)-camNo(y))[0]}
+  return best?best.deviceId:null}catch(e){return null}}
+async function getStream(){
+ const md=navigator.mediaDevices;if(!md||!md.getUserMedia)throw new Error('no-cam');
+ let s=null,last=null;
+ for(const v of[{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},{facingMode:'environment'},true]){
+  try{s=await md.getUserMedia({video:v,audio:false});break}catch(e){last=e;if(e&&(e.name=='NotAllowedError'||e.name=='SecurityError'))break}}
+ if(!s)throw last||new Error('no-cam');
+ // etichetele camerelor apar abia după permisiune → acum putem alege obiectivul principal
+ const id=await pickBack(),tr=s.getVideoTracks()[0];
+ let cid='';try{cid=(tr.getSettings&&tr.getSettings().deviceId)||''}catch(e){}
+ if(id&&id!==cid){try{const s2=await md.getUserMedia({video:{deviceId:{exact:id},width:{ideal:1920},height:{ideal:1080}},audio:false});s.getTracks().forEach(t=>t.stop());s=s2}catch(e){}}
+ // camere logice (Pixel/Samsung): zoom 1× = obiectivul principal, nu ultra-wide (0.5×)
+ try{const t=s.getVideoTracks()[0],c=t.getCapabilities&&t.getCapabilities();
+  if(c&&c.zoom&&c.zoom.min<1&&c.zoom.max>=1)t.applyConstraints({advanced:[{zoom:1}]}).catch(()=>{})}catch(e){}
+ return s}
+function stopCam(){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}try{$('#cvid').srcObject=null}catch(e){}}
 function camUI(prev){$('#cvid').hidden=prev;$('#cprev').hidden=!prev;$('#cshoot').hidden=prev;$('#cretake').hidden=$('#csend').hidden=!prev}
+function closeCam(){stopCam();$('#cam').hidden=true;if(sosPhoto)endSosPhoto()}
 async function openCam(title,cb){camCb=cb;camBlob=null;$('#ctitle').textContent=title;
- try{camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280}},audio:false});
-  $('#cvid').srcObject=camStream;camUI(false);$('#cam').hidden=false}
- catch(e){$('#ffile').onchange=async ev=>{const f=ev.target.files[0];ev.target.value='';if(f)cb(await shrink(f))};$('#ffile').click()}}
-function shrink(f,max=1280){return new Promise(r=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);c.toBlob(r,'image/jpeg',.82)};i.src=URL.createObjectURL(f)})}
-$('#cshoot').onclick=()=>{const v=$('#cvid'),k=Math.min(1,1280/Math.max(v.videoWidth,v.videoHeight)),c=document.createElement('canvas');c.width=v.videoWidth*k;c.height=v.videoHeight*k;c.getContext('2d').drawImage(v,0,0,c.width,c.height);
- c.toBlob(b=>{camBlob=b;$('#cprev').src=URL.createObjectURL(b);camUI(true)},'image/jpeg',.85);vib(40)};
+ try{camStream=await getStream();
+  const v=$('#cvid');v.srcObject=camStream;v.muted=true;v.setAttribute('playsinline','');camUI(false);$('#cam').hidden=false;
+  try{await v.play()}catch(e){}}
+ catch(e){stopCam();
+  if(e&&e.name=='NotAllowedError')feed('Accesul la cameră e blocat în setări — folosesc camera telefonului.');
+  // rezervă pentru orice dispozitiv: camera sistemului (obiectiv principal)
+  const f=$('#ffile');f.onchange=async ev=>{const x=ev.target.files[0];ev.target.value='';if(x){try{cb(await shrink(x))}catch(er){feed('Poza nu a putut fi procesată')}}else if(sosPhoto)endSosPhoto()};
+  f.oncancel=()=>{if(sosPhoto)endSosPhoto()};
+  if(sosPhoto){clearTimeout(sosPhotoW);sosPhotoW=setTimeout(()=>{if(sosPhoto&&$('#cam').hidden)endSosPhoto()},60000)}
+  f.click()}}
+function shrink(f,max=1280){return new Promise((r,j)=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);c.toBlob(b=>b?r(b):j(),'image/jpeg',.82)};i.onerror=j;i.src=URL.createObjectURL(f)})}
+$('#cshoot').onclick=()=>{const v=$('#cvid');if(!v.videoWidth){feed('Camera nu e încă gata, mai așteaptă o secundă.');return}
+ const k=Math.min(1,1280/Math.max(v.videoWidth,v.videoHeight)),c=document.createElement('canvas');c.width=v.videoWidth*k;c.height=v.videoHeight*k;c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+ c.toBlob(b=>{if(!b){feed('Poza nu a reușit, încearcă din nou.');return}camBlob=b;$('#cprev').src=URL.createObjectURL(b);camUI(true)},'image/jpeg',.85);vib(40)};
 $('#cretake').onclick=()=>camUI(false);
-$('#cx').onclick=()=>{stopCam();$('#cam').hidden=true};
-$('#csend').onclick=()=>{const b=camBlob;stopCam();$('#cam').hidden=true;camCb(b)};
-async function upload(kind,blob){
+$('#cx').onclick=closeCam;
+$('#csend').onclick=()=>{const b=camBlob,f=camCb;stopCam();$('#cam').hidden=true;if(f)f(b);if(sosPhoto)endSosPhoto()};
+async function upload(kind,blob,extra){
  if(!pos)return feed('Aștept locația GPS…');
  const fd=new FormData();fd.append('file',blob,'p.jpg');fd.append('user',I.user);fd.append('tok',TOK);fd.append('lat',pos.lat);fd.append('lng',pos.lng);
+ if(extra&&extra.sos)fd.append('sos','1');
+ const fail=d=>{if(extra&&extra.sos)feed('Poza SOS nu a putut fi trimisă: '+d);else pop('Nu s-a putut trimite',d)};
  try{const r=await fetch(API+`/api/room/${I.code}/${kind}`,{method:'POST',body:fd});
-  if(!r.ok){let d='Trimiterea a eșuat';try{d=(await r.json()).detail||d}catch(e){}pop('Nu s-a putut trimite',d)}}
- catch(e){pop('Nu s-a putut trimite','Verifică conexiunea la internet și încearcă din nou.')}}
+  if(!r.ok){let d='Trimiterea a eșuat';try{d=(await r.json()).detail||d}catch(e){}fail(d)}
+  else if(extra&&extra.sos)feed('Poza SOS a fost trimisă')}
+ catch(e){fail('Verifică conexiunea la internet și încearcă din nou.')}}
 $('#bcam').onclick=()=>openCam('Indiciu foto',b=>upload('photo',b));
 $('#caught').onclick=()=>openCam('Fă o poză unde ai fost prins',b=>upload('capture',b));
 

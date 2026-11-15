@@ -256,13 +256,16 @@ public class GameService extends Service {
         JSONObject sos = st.isNull("sos") ? null : st.optJSONObject("sos");
         String sosKey = sos == null ? "" : (s(sos, "u") + ":" + sos.optDouble("t", 0));
         boolean first = pPhase == null;
+        // Notificarea SOS apare doar cât ține situația: dispare când SOS-ul s-a încheiat (indiferent dacă aplicația e deschisă)
+        // sau când deschizi aplicația (alerta se vede deja acolo).
+        if (!"sos".equals(phase) || appVisible) cancelSos();
         if (!first && !appVisible) {
             boolean hider = "hider".equals(role);
             if ("sos".equals(phase) && sos != null && !sosKey.equals(pSosKey)) {
                 sosAlert(st, sos);
             } else if (!"sos".equals(phase) && "sos".equals(pPhase)) {
-                try { ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(ID_SOS); } catch (Exception e) { }
-                alert("SOS încheiat", "Alerta SOS a fost închisă. Revii în cameră.", CH_ALERT, false, false, 0xFF30D158);
+                cancelSos();
+                alert("SOS încheiat", "Alerta SOS a fost închisă. Revii în cameră.", CH_ALERT, false, false, 0xFF30D158, 30000);
             }
             if ("hiding".equals(phase) && round != pRound)
                 alert("Runda a început — ești " + (hider ? "HIDER" : "SEEKER"), hider ? "Ascunde-te! Seekerii pornesc după cronometru." : "Hiderii se ascund. Așteaptă cronometrul.", CH_ALERT, false, false, hider ? 0xFF2A2A2E : 0xFFFF3B30);
@@ -304,6 +307,7 @@ public class GameService extends Service {
             .setFullScreenIntent(openApp(false, 3, true), true);
         if (logo != null) b.setLargeIcon(logo);
         if (Build.VERSION.SDK_INT < 26) { b.setDefaults(Notification.DEFAULT_ALL); }
+        else b.setTimeoutAfter(60 * 1000L);   // nu rămâne permanent în bara de notificări
         if (!mine && !sos.isNull("lat")) b.addAction(0, "Navighează", navIntent(sos.optDouble("lat"), sos.optDouble("lng")));
         b.addAction(0, "Deschide", openApp(false, 1, true));
         Notification n = b.build();
@@ -312,6 +316,15 @@ public class GameService extends Service {
     }
 
     private void alert(String title, String text, String ch, boolean full, boolean insist, int color) {
+        alert(title, text, ch, full, insist, color, 0);
+    }
+
+    /** Elimină notificarea SOS (situația s-a încheiat sau aplicația este deschisă). */
+    private void cancelSos() {
+        try { ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(ID_SOS); } catch (Exception e) { }
+    }
+
+    private void alert(String title, String text, String ch, boolean full, boolean insist, int color, long timeoutMs) {
         try {
             Notification.Builder b = nb(ch);
             b.setSmallIcon(smallIcon()).setContentTitle(title).setContentText(text)
@@ -321,6 +334,7 @@ public class GameService extends Service {
                 .setContentIntent(openApp(false, 1, false));
             if (logo != null) b.setLargeIcon(logo);
             if (Build.VERSION.SDK_INT < 26) b.setDefaults(Notification.DEFAULT_ALL);
+            else if (timeoutMs > 0) b.setTimeoutAfter(timeoutMs);
             ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(nextId++, b.build());
             if (nextId > 5200) nextId = 5000;
         } catch (Exception e) { }
@@ -437,7 +451,6 @@ public class GameService extends Service {
             b.addAction(0, "Deschide", openApp(false, 1, false));
         } else {
             b.addAction(0, "Deschide", openApp(false, 1, false));
-            if (st == null || !"sos".equals(s(st, "phase"))) b.addAction(0, "SOS", openApp(true, 2, false));
         }
         b.addAction(0, "Ieși", leaveIntent());
         return b.build();

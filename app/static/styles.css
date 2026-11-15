@@ -33,11 +33,12 @@ svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap
 .sp-ver{position:absolute;bottom:calc(var(--sb) + 26px);letter-spacing:.32em;font-size:10px;color:#666;text-transform:uppercase}
 
 /* ---------- hartă ---------- */
-#map{position:fixed;inset:0;z-index:0;background:#fff}#map.idle{pointer-events:none}
-.leaflet-container{background:#fff;font-family:inherit}
-.leaflet-tile-pane{filter:grayscale(1) brightness(1.12) contrast(.88)}
-.leaflet-control-attribution{background:rgba(255,255,255,.75)!important;color:#777!important;font-size:9px}.leaflet-control-attribution a{color:#555!important}
-#shade{position:fixed;inset:0;z-index:1;background:linear-gradient(rgba(0,0,0,.84),rgba(0,0,0,.94));}
+#map{position:fixed;inset:0;z-index:0;background:#0d0e11}#map.idle{pointer-events:none}
+.leaflet-container{background:#0d0e11;font-family:inherit}
+/* rezervă dark: dacă harta dark (CARTO) nu răspunde, dalele OpenStreetMap se inversează */
+.leaflet-tile.dn-inv{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(.9) saturate(.55)}
+.leaflet-control-attribution{background:rgba(0,0,0,.55)!important;color:#8b8f98!important;font-size:9px}.leaflet-control-attribution a{color:#a9acb3!important}
+#shade{position:fixed;inset:0;z-index:1;background:linear-gradient(rgba(0,0,0,.84),rgba(0,0,0,.94))}
 
 .screen{position:fixed;top:0;left:0;right:0;height:100vh;height:100dvh;z-index:10;display:flex;flex-direction:column;padding:calc(var(--sa) + 24px) 20px calc(var(--sb) + 20px);overflow:auto;gap:14px;max-width:460px;margin:auto}
 #intro{justify-content:center}
@@ -49,7 +50,10 @@ input:not([type]),input[type=text]{width:100%;padding:16px;background:#000;borde
 input:focus{border-color:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.08)}.code{text-align:center;letter-spacing:.5em;font-weight:800;font-size:26px;text-transform:uppercase}
 .dots{display:flex;gap:6px;margin-bottom:18px}.dots i{height:3px;flex:1;background:var(--g2);border-radius:3px;transition:.3s}.dots i.on{background:#fff}
 #err{color:#ff8a80;font-size:13px;min-height:20px;margin-top:8px;font-weight:500}
-.btns{display:flex;gap:10px;margin-top:6px}.btns .primary{flex:1}
+.btns{display:flex;gap:10px;margin-top:6px}.btns .primary{flex:1;text-align:center}
+/* pasul „Intră în cameră”: butonul principal pe tot rândul, centrat; „Înapoi” dedesubt */
+.btns.stack{flex-direction:column;align-items:stretch}.btns.stack #next{order:-1;flex:none;width:100%}.btns.stack #back{width:100%}
+#create{display:block;text-align:center}
 button{cursor:pointer;border:1px solid var(--g2);background:var(--g1);border-radius:15px;padding:15px 18px;font-weight:600;transition:transform .12s,opacity .2s,box-shadow .2s}
 button:active{transform:scale(.95)}button:disabled{opacity:.35}
 .primary{background:#fff;color:#000;border-color:#fff;box-shadow:0 8px 24px rgba(255,255,255,.12)}.ghost{background:transparent;border-color:#383a41}
@@ -154,10 +158,10 @@ button:active{transform:scale(.95)}button:disabled{opacity:.35}
 .cbot{position:absolute;bottom:calc(var(--sb) + 28px);left:0;right:0;display:flex;justify-content:center;align-items:center;gap:16px}
 .shutter{width:78px;height:78px;border-radius:50%;background:#fff;border:5px solid #000;outline:3px solid #fff;padding:0}
 
-/* ---------- markere hartă (harta e albă → markere contrastante) ---------- */
+/* ---------- markere hartă (hartă dark → markere luminoase) ---------- */
 .pin{position:relative;width:22px;height:22px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.45)}
-.pin.seeker{background:var(--red)}.pin.hider{background:#111}.pin.dead{background:#9a9ca3;opacity:.7}.pin.target{background:var(--red)}
-.pin.ghost{background:rgba(17,17,17,.55);border:2px dashed #111;box-shadow:none}
+.pin.seeker{background:var(--red)}.pin.hider{background:var(--green)}.pin.dead{background:#6b6d75;opacity:.75}.pin.target{background:var(--red)}
+.pin.ghost{background:rgba(48,209,88,.3);border:2px dashed var(--green);box-shadow:none}
 .pin.seeker:after{content:"";position:absolute;inset:-9px;border-radius:50%;border:2px solid rgba(255,59,48,.45);animation:mp2 2.2s ease-out infinite}
 @keyframes mp2{from{transform:scale(.6);opacity:1}to{transform:scale(1.25);opacity:0}}
 .me{width:22px;height:22px;border-radius:50%;background:var(--blue);border:4px solid #fff;box-shadow:0 2px 12px rgba(10,132,255,.7)}
@@ -165,8 +169,8 @@ button:active{transform:scale(.95)}button:disabled{opacity:.35}
 .sosm{width:30px;height:30px;border-radius:50%;background:var(--red);border:4px solid #fff;display:grid;place-items:center;color:#fff;font:800 9px Inter;animation:sosp 1s infinite}
 .pulse{width:22px;height:22px;border-radius:50%;animation:gr 1.4s ease-in-out infinite alternate;border:3px solid #fff;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.4)}
 @keyframes gr{from{background:#00c853}to{background:#e00000}}
-.tip{background:#111;color:#fff;border:0;border-radius:9px;font:600 11px Inter,system-ui;padding:3px 8px;box-shadow:0 3px 10px rgba(0,0,0,.35)}.tip:before{display:none}
-.tip.red{background:var(--red)}
+.tip{background:rgba(18,19,23,.92);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:9px;font:600 11px Inter,system-ui;padding:3px 8px;box-shadow:0 3px 10px rgba(0,0,0,.5)}.tip:before{display:none}
+.tip.red{background:var(--red);border-color:rgba(255,255,255,.4)}
 .hb{display:flex;gap:8px}
 #boot{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
 #boot p{color:#ccc;font-size:14px}
@@ -200,3 +204,32 @@ button.pill{border:0;padding:4px 10px;border-radius:20px;font-weight:600}
 .shi{width:18px;height:18px;vertical-align:-4px}
 #iosnote{color:#ffb4ae!important}
 #jserr{position:fixed;left:8px;right:8px;bottom:8px;z-index:999;background:#b00020;color:#fff;font:12px/1.35 monospace;padding:8px 10px;border-radius:10px;word-break:break-word}
+
+/* ---------- BLUR (sticlă mată) în toată interfața ---------- */
+:root{--bl:blur(18px) saturate(160%);--bl2:blur(10px) saturate(140%)}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ /* ecranele de start / lobby / final: harta dark apare estompată în spate */
+ #shade{background:linear-gradient(rgba(0,0,0,.52),rgba(0,0,0,.74));-webkit-backdrop-filter:blur(16px) saturate(120%);backdrop-filter:blur(16px) saturate(120%)}
+ .card,.pc{background:rgba(22,23,27,.6);-webkit-backdrop-filter:var(--bl);backdrop-filter:var(--bl);border-color:rgba(255,255,255,.12)}
+ input:not([type]),input[type=text]{background:rgba(0,0,0,.5)}
+ .chip{background:rgba(0,0,0,.45);-webkit-backdrop-filter:var(--bl2);backdrop-filter:var(--bl2)}.chip.on{background:#fff}
+ .ghost{-webkit-backdrop-filter:var(--bl2);backdrop-filter:var(--bl2)}
+ .getb{background:rgba(255,255,255,.08);-webkit-backdrop-filter:var(--bl2);backdrop-filter:var(--bl2)}
+ /* joc */
+ #hud{background:rgba(12,12,15,.55);-webkit-backdrop-filter:var(--bl);backdrop-filter:var(--bl)}
+ .round{background:rgba(14,15,18,.5);-webkit-backdrop-filter:var(--bl);backdrop-filter:var(--bl)}
+ .round.main{background:rgba(255,255,255,.92)}
+ .round.sos{background:linear-gradient(160deg,rgba(255,59,48,.92),rgba(196,22,12,.92))}
+ .pill{-webkit-backdrop-filter:var(--bl2);backdrop-filter:var(--bl2)}
+ #sospanel{background:rgba(40,6,4,.58);-webkit-backdrop-filter:var(--bl);backdrop-filter:var(--bl)}
+ .fi{background:rgba(255,255,255,.86);-webkit-backdrop-filter:var(--bl2);backdrop-filter:var(--bl2)}
+ #warn{background:rgba(255,255,255,.88);-webkit-backdrop-filter:var(--bl2);backdrop-filter:var(--bl2)}
+ #alert{background:rgba(0,0,0,.6);-webkit-backdrop-filter:var(--bl);backdrop-filter:var(--bl)}
+ .tip{-webkit-backdrop-filter:var(--bl2);backdrop-filter:var(--bl2)}
+ .leaflet-control-attribution{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+ /* ferestre, panouri, dialoguri */
+ #sheet,#pop,#photo,#sosconf,#iosm{background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+ .sh,.pcard{background:rgba(20,21,24,.72);-webkit-backdrop-filter:var(--bl);backdrop-filter:var(--bl);border-color:rgba(255,255,255,.12)}
+ #cam .ctop{padding:6px 6px 6px 14px;border-radius:18px;background:rgba(0,0,0,.35);-webkit-backdrop-filter:var(--bl2);backdrop-filter:var(--bl2);left:12px;right:12px}
+ #cam .cbot button.ghost,#cam .cbot .primary{-webkit-backdrop-filter:var(--bl2);backdrop-filter:var(--bl2)}
+}

@@ -49,7 +49,7 @@ g=g.replace(/buildTypes\s*\{\s*release\s*\{/,`signingConfigs {
         release {
             signingConfig signingConfigs.release`);
 g=g.replace(/versionCode\s+\d+/,"versionCode(System.getenv('DN_VC') ? System.getenv('DN_VC').toInteger() : 1)")
-   .replace(/versionName\s+"[^"]*"/,'versionName "2.0"');
+   .replace(/versionName\s+"[^"]*"/,'versionName "2.1"');
 g=g.replace(/android\s*\{/,'android {\n    lint {\n        abortOnError false\n        checkReleaseBuilds false\n    }');
 g+="\ntasks.withType(JavaCompile) { options.encoding = 'UTF-8' }\n";
 must(g.includes('signingConfig signingConfigs.release')&&g.includes('lint {'),'patch build.gradle esuat');
