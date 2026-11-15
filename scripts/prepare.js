@@ -21,5 +21,5 @@ h=h.replace(/<link[^>]*fonts\.(googleapis|gstatic)\.com[^>]*>/g,'')
    .replace('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js','vendor/leaflet/leaflet.js');
 if(h.includes('unpkg.com')||h.includes('fonts.googleapis'))throw new Error('index.html inca are resurse externe');
 fs.writeFileSync('www/index.html',h);
-fs.writeFileSync('www/config.js','window.DN_SERVER='+JSON.stringify(url)+';\nwindow.DN_WEB="";\nwindow.DN_GITHUB="https://github.com/victorrosca89";\nwindow.DN_MAIL="victorrosca89@gmail.com";\n');
+fs.writeFileSync('www/config.js','window.DN_SERVER='+JSON.stringify(url)+';\nwindow.DN_WEB="https://victorrosca89.github.io/DE-A-SNURU-WEB/";\nwindow.DN_GITHUB="https://github.com/victorrosca89";\nwindow.DN_MAIL="victorrosca89@gmail.com";\n');
 console.log('www gata, server:',url);
