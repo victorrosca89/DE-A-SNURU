@@ -19,4 +19,5 @@ APK semnat construit de GitHub Actions (`.github/workflows/android.yml`), conect
 - **Aspect:** sticlă mată (blur) rafinată, animații de intrare, vignetă pe hartă.
 - **Notificări (și cu ecranul stins):** start de joc + rolul tău, 30 s de ascundere, pornirea vânătorii, 1 minut până la final, Hider prins, jucători care intră/ies din lobby, final de joc; ecranul se aprinde la alertele importante.
 - **Reveal:** scos textul „Jump in”.
-- **Spectator:** Hider roșu · Seeker galben · Spectator albastru · pierdut gri; „X” pe hartă unde a fost prins cineva; cei pierduți au SOS și buton „Intră ca spectator”; spectatorii văd locația tuturor și pot trimite poze. **Necesită serverul actualizat: vezi `SERVER_SPECTATE.md`.**
+- **Poze descărcate:** bară „Locație / DE-A ȘNURU / Nume Prenume · oră” cu logo în dreapta, hartă OpenStreetMap 1:1 sus-dreapta, rol (Seeker/Hider) sus-stânga.
+- **SOS:** poza are „SOS” scris pe ea (client), se trimite ca poză obișnuită, se deschide și se descarcă din butonul „Poza SOS” sau de pe hartă. Fără modificări pe server.
