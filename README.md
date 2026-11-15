@@ -1,23 +1,66 @@
-# DE-A ȘNURU' (Android)
-APK semnat construit de GitHub Actions (`.github/workflows/android.yml`), conectat la serverul de pe Hugging Face.
-- `app/static/` – front-end (identic cu cel din Space)
-- `android-src/` – Java nativ: `GameService` (fundal, GPS, notificări, alerte), `GamePlugin`, `MainActivity`, `SaveImagePlugin`
-- `scripts/` – pregătirea fișierelor web și patch-uri Android (permisiuni, serviciu, semnare)
-- `signing/` – cheia de semnare (vezi INSTRUCTIUNI.md)
+# DE-A ȘNURU
 
-## Modificări v2.1
-- **Notificări:** „SOS” nu mai apare permanent. Butonul SOS a fost scos din notificarea live; alerta SOS dispare când situația s-a încheiat, când deschizi aplicația sau după 60 s.
-- **SOS → poză automată:** după confirmarea SOS (ține apăsat 2 s) se deschide camera; SOS-ul se trimite imediat, poza se atașează după aceea.
-- **Cameră:** se alege obiectivul principal (wide), nu ultra-wide; rezervă pe camera sistemului pentru orice dispozitiv.
-- **Hartă gri dark** din OpenStreetMap (fără CARTO).
-- **Blur** (sticlă mată) pe HUD, butoane, carduri, ferestre și fundal.
-- Butonul „Intră în cameră” este centrat, pe tot rândul.
+**Nu te lăsa prins.**
 
-## Modificări v2.2
-- **Hartă:** OpenStreetMap în gri dark (dale OSM filtrate), fără CARTO.
-- **Cameră:** obiectivul principal (wide, standard), cadru 4:3 ca în aplicația foto; ultra-wide doar evitat, rezervă pe camera sistemului.
-- **Aspect:** sticlă mată (blur) rafinată, animații de intrare, vignetă pe hartă.
-- **Notificări (și cu ecranul stins):** start de joc + rolul tău, 30 s de ascundere, pornirea vânătorii, 1 minut până la final, Hider prins, jucători care intră/ies din lobby, final de joc; ecranul se aprinde la alertele importante.
-- **Reveal:** scos textul „Jump in”.
-- **Poze descărcate:** bară „Locație / DE-A ȘNURU / Nume Prenume · oră” cu logo în dreapta, hartă OpenStreetMap 1:1 sus-dreapta, rol (Seeker/Hider) sus-stânga.
-- **SOS:** poza are „SOS” scris pe ea (client), se trimite ca poză obișnuită, se deschide și se descarcă din butonul „Poza SOS” sau de pe hartă. Fără modificări pe server.
+DE-A ȘNURU este o experiență multiplayer de urmărire, strategie și supraviețuire în lumea reală.
+
+Ascunde-te. Caută. Urmărește. Fiecare decizie contează, fiecare secundă poate schimba jocul.
+
+Nu există două jocuri identice. Există doar cei care caută și cei care încearcă să scape.
+
+---
+
+## Despre joc
+
+DE-A ȘNURU' aduce jocul clasic de-a v-ați ascunselea într-o experiență interactivă, în care participanții devin parte din acțiune.
+
+Intră într-o partidă, alătură-te unei echipe și pregătește-te pentru o experiență în care atenția, strategia și instinctul fac diferența.
+
+## Roluri
+
+**Vânător (Seeker)**
+
+Misiunea ta este să găsești ceilalți participanți înainte ca timpul să expire.
+
+**Ascuns (Hider)**
+
+Rămâi nedetectat, gândește strategic și folosește fiecare avantaj pentru a scăpa.
+
+**Spectator**
+
+Urmărește desfășurarea partidei fără să participi direct la acțiune.
+
+## Funcționalități
+
+- Partide multiplayer.
+- Camere private pentru participanți.
+- Hartă interactivă.
+- Localizarea participanților.
+- Sistem de alerte SOS.
+- Capturarea și distribuirea fotografiilor.
+- Notificări în timpul jocului.
+- Mod Spectator.
+- Interfață optimizată pentru Android.
+
+## Cerințe de sistem
+
+- **Platformă:** Android
+- **Versiune minimă vizată:** Android 6.0 (Marshmallow)
+- **Conexiune la internet:** Necesară
+- **GPS:** Necesar pentru funcționalitățile de localizare
+- **Cameră:** Necesară pentru funcționalitățile foto
+
+*Compatibilitatea cu versiuni mai vechi poate depinde de dispozitiv și de serviciile Android disponibile.*
+
+## Proiect
+
+Dezvoltat de **Roșca Victor**.
+
+Repository: [DE-A-SNURU](https://github.com/victorrosca89/DE-A-SNURU)
+Website: [DE-A-SNURU](https://lvr-89-vicproj.hf.space)
+
+---
+
+*Uneori, cel mai bun lucru pe care îl poți face este să nu fii găsit.*
+
+**DE-A ȘNURU.**
